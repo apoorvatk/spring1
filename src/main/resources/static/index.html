@@ -44,6 +44,16 @@
 
     <p id="updateMessage"></p>
 
+    <!-- Delete Student -->
+    <h2>Delete Student</h2>
+    <form id="deleteForm">
+        <label for="deleteId">Student ID:</label>
+        <input type="number" id="deleteId" required><br><br>
+        <button type="submit">Delete Student</button>
+    </form>
+
+    <p id="deleteMessage"></p>
+
     <script>
         // Create Student
         document.getElementById("studentForm").addEventListener("submit", function(event) {
@@ -103,6 +113,28 @@
             })
             .catch(error => {
                 document.getElementById("updateMessage").innerText = "Error updating student.";
+            });
+        });
+
+        // Delete Student
+        document.getElementById("deleteForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById("deleteId").value;
+
+            fetch(`http://localhost:8080/students/delete/${id}`, {
+                method: "DELETE"
+            })
+            .then(response => {
+                if (response.ok) {
+                    document.getElementById("deleteMessage").innerText = `Student with ID ${id} deleted successfully.`;
+                    fetchStudents(); // Refresh list
+                } else {
+                    document.getElementById("deleteMessage").innerText = "Error deleting student.";
+                }
+            })
+            .catch(error => {
+                document.getElementById("deleteMessage").innerText = "Error deleting student.";
             });
         });
     </script>
