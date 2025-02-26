@@ -8,6 +8,7 @@
 <body>
     <h1>Welcome to UniVerse!</h1>
 
+    <!-- Create Student Form -->
     <h2>Create Student</h2>
     <form id="studentForm">
         <label for="name">Name:</label>
@@ -24,32 +25,84 @@
 
     <p id="responseMessage"></p>
 
+    <!-- Read Students -->
+    <h2>Student List</h2>
+    <button onclick="fetchStudents()">Load Students</button>
+    <ul id="studentList"></ul>
+
+    <!-- Update Student Name -->
+    <h2>Update Student Name</h2>
+    <form id="updateForm">
+        <label for="updateId">Student ID:</label>
+        <input type="number" id="updateId" required><br><br>
+
+        <label for="updateName">New Name:</label>
+        <input type="text" id="updateName" required><br><br>
+
+        <button type="submit">Update Student</button>
+    </form>
+
+    <p id="updateMessage"></p>
+
     <script>
+        // Create Student
         document.getElementById("studentForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent page reload
+            event.preventDefault(); 
             
-            // Get form values
             const name = document.getElementById("name").value;
             const email = document.getElementById("email").value;
             const age = document.getElementById("age").value;
 
-            // Prepare request data
-            const studentData = { name, email, age };
-
-            // Send POST request
             fetch("http://localhost:8080/students/create", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(studentData)
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, age })
             })
             .then(response => response.json())
             .then(data => {
                 document.getElementById("responseMessage").innerText = `Student Created: ID = ${data.id}`;
+                fetchStudents(); // Refresh list
             })
             .catch(error => {
                 document.getElementById("responseMessage").innerText = "Error creating student.";
+            });
+        });
+
+        // Read Students
+        function fetchStudents() {
+            fetch("http://localhost:8080/students")
+            .then(response => response.json())
+            .then(data => {
+                const studentList = document.getElementById("studentList");
+                studentList.innerHTML = ""; 
+                data.forEach(student => {
+                    const li = document.createElement("li");
+                    li.innerText = `ID: ${student.id}, Name: ${student.name}, Email: ${student.email}, Age: ${student.age}`;
+                    studentList.appendChild(li);
+                });
+            })
+            .catch(error => console.error("Error fetching students:", error));
+        }
+
+        // Update Student Name
+        document.getElementById("updateForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById("updateId").value;
+            const name = document.getElementById("updateName").value;
+
+            fetch(`http://localhost:8080/students/update/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("updateMessage").innerText = `Student Updated: ID = ${data.id}, New Name = ${data.name}`;
+                fetchStudents(); // Refresh list
+            })
+            .catch(error => {
+                document.getElementById("updateMessage").innerText = "Error updating student.";
             });
         });
     </script>
